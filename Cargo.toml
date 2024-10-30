@@ -1,0 +1,16 @@
+[package]
+name = "chatroom-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.7.7", features = ["ws"] }
+futures = "0.3.26"
+tokio = { version = "1.26.0", features = ["full"] }
+serde = { version = "1.0.157", features = ["derive"] }
+tower-http = { version = "0.6.1", features = ["cors"] }
+serde_json = "1.0.94"
+log = "0.4.17"
+env_logger = "0.11.5"
