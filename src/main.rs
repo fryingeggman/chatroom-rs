@@ -7,7 +7,7 @@ use axum::{
     Router,
 };
 use futures::{SinkExt, StreamExt};
-use log::info;
+use log::{error, info};
 use serde::Deserialize;
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -74,6 +74,12 @@ async fn handler(ws: WebSocketUpgrade, State(state): State<Arc<AppState>>) -> im
     ws.on_upgrade(|socket| handle_socket(socket, state))
 }
 
+#[derive(Deserialize)]
+struct Connect {
+    username: String,
+    channel: String,
+}
+
 async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
     let (mut sender, mut receiver) = socket.split();
     let mut username = String::new();
@@ -82,17 +88,10 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
 
     while let Some(Ok(msg)) = receiver.next().await {
         if let Message::Text(name) = msg {
-            #[derive(Deserialize)]
-            struct Connect {
-                username: String,
-                channel: String,
-            }
-
             let connect: Connect = match serde_json::from_str(&name) {
                 Ok(connect) => connect,
                 Err(err) => {
-                    println!("{}", &name);
-                    println!("{}", err);
+                    error!("Error {}, name: {}", err, &name);
                     let _ = sender
                         .send(Message::from("Failed to connect to room!"))
                         .await;
@@ -155,7 +154,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
     tokio::select! {
         _ = (&mut send_messages) => recv_messages.abort(),
         _ = (&mut recv_messages) => send_messages.abort(),
-    };
+    }
 
     let left = format!("{} left the chat!", username);
     let _ = tx.send(left);
