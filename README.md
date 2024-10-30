@@ -9,7 +9,6 @@ The client for the chat room is written in Svelte
 ## Table of Contents
 
 - [Features](#features)
-- [Installation](#installation)
 - [Usage](#usage)
 
 ## Features
